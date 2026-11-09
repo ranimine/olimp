@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Анкета для олимпиады</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f6f8;
+        margin: 0;
+        padding: 30px;
+        display: flex;
+        justify-content: center;
+    }
+    .card {
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        max-width: 480px;
+        width: 100%;
+    }
+    h1 {
+        font-size: 22px;
+        color: #2c3e50;
+        margin-top: 0;
+        text-align: center;
+    }
+    label {
+        display: block;
+        margin: 15px 0 5px;
+        font-weight: bold;
+        color: #34495e;
+    }
+    input {
+        width: 100%;
+        padding: 10px;
+        font-size: 15px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+    input:focus {
+        outline: none;
+        border-color: #3498db;
+        box-shadow: 0 0 4px rgba(52,152,219,0.4);
+    }
+    button {
+        margin-top: 18px;
+        width: 100%;
+        padding: 11px;
+        background: #3498db;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    button:hover {
+        background: #2980b9;
+    }
+    .result {
+        margin-top: 20px;
+        padding: 12px 15px;
+        border-radius: 6px;
+        font-size: 15px;
+        line-height: 1.4;
+    }
+    .result.ok {
+        background: #e8f8f0;
+        color: #1e8449;
+        border-left: 4px solid #2ecc71;
+    }
+    .result.error {
+        background: #fdecea;
+        color: #c0392b;
+        border-left: 4px solid #e74c3c;
+    }
+</style>
+</head>
+<body>
+<div class="card">
+    <h1>Анкета для олимпиады</h1>
+
+    <label for="birthDate">Введите дату рождения (ДД.ММ.ГГГГ):</label>
+    <input type="text" id="birthDate" placeholder="12.05.2009">
+    <button id="checkBtn">Проверить</button>
+
+    <div id="result" class="result" style="display:none;"></div>
+</div>
+
+<script>
+    // Основная функция проверки и форматирования даты рождения
+    function checkOlympiadDate(inputString) {
+        const parts = inputString.trim().split(".");
+
+        // 1. Проверка формата
+        if (parts.length !== 3) {
+            return { ok: false, message: "Ошибка: неверный формат. Используйте ДД.ММ.ГГГГ." };
+        }
+
+        // 2. Проверка, что все части — числа
+        if (parts.some(part => !/^\d+$/.test(part))) {
+            return { ok: false, message: "Ошибка: все части даты должны быть числами." };
+        }
+
+        const day = Number(parts[0]);
+        const month = Number(parts[1]) - 1; // JS: месяцы 0-11
+        const year = Number(parts[2]);
+
+        const date = new Date(year, month, day);
+
+        // 3. Проверка, что дата реально существует
+        if (date.getDate() !== day ||
+            date.getMonth() !== month ||
+            date.getFullYear() !== year) {
+            return { ok: false, message: "Ошибка: такой даты не существует." };
+        }
+
+        // 4. Проверка, что дата не в будущем
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        if (date > today) {
+            return { ok: false, message: "Ошибка: дата рождения не может быть в будущем." };
+        }
+
+        // 5. Форматирование результата
+        const datePart = date.toLocaleDateString("ru-RU", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        });
+
+        const weekdayPart = date.toLocaleDateString("ru-RU", {
+            weekday: "long"
+        });
+
+        return { ok: true, message: `${datePart}, ${weekdayPart}` };
+    }
+
+    // Обработчик кнопки
+    document.getElementById("checkBtn").addEventListener("click", () => {
+        const input = document.getElementById("birthDate").value;
+        const resultDiv = document.getElementById("result");
+
+        const { ok, message } = checkOlympiadDate(input);
+
+        resultDiv.style.display = "block";
+        resultDiv.textContent = message;
+        resultDiv.className = "result " + (ok ? "ok" : "error");
+
+        console.log(message);
+    });
+</script>
+</body>
+</html>
